@@ -398,7 +398,10 @@ def export_mdl(
     if not mdl.skins:
         make_skin(operator, mdl, mesh)
     if not mdl.frames:
-        for fno in range(context.scene.frame_start, context.scene.frame_end + 1):
+        # Export up to the last scene frame:
+        # for fno in range(context.scene.frame_start, context.scene.frame_end + 1):
+        # Only export up to current frame:
+        for fno in range(context.scene.frame_start, context.scene.frame_current + 1):
             context.scene.frame_set(fno)
             obj.update_from_editmode()
             depsgraph = context.evaluated_depsgraph_get()
