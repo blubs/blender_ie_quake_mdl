@@ -116,6 +116,17 @@ class QFMDLSettings(bpy.types.PropertyGroup):
     #    name="Script",
     #    description="Script for animating frames and skins")
 
+    mdl_scale_mins : FloatVectorProperty(
+        name="MDL Mins",
+        default=(-400.0,-100.0,-100.0),
+        description="Minimum allowed vertex coordinates")
+    mdl_scale_maxs : FloatVectorProperty(
+        name="MDL Maxs",
+        default=(100.0,100.0,100.0),
+        description="Maximum allowed vertex coordinates")
+    
+
+
 class ImportMDL6(bpy.types.Operator, ImportHelper):
     '''Load a Quake MDL (v6) File'''
     bl_idname = "import_mesh.quake_mdl_v6"
@@ -172,6 +183,16 @@ class ExportMDL6(bpy.types.Operator, ExportHelper):
     md16 : BoolProperty(
         name="16-bit",
         description="16 bit vertex coordinates: QuakeForge only")
+    mdl_scale_mins : FloatVectorProperty(
+        name="MDL Mins",
+        default=(-100.0,-100.0,-100.0),
+        # default = bpy.context.active_object.qfmdl.mdl_scale_mins,
+        description="Minimum allowed vertex coordinates")
+    mdl_scale_maxs : FloatVectorProperty(
+        name="MDL Maxs",
+        default=(100.0,100.0,100.0),
+        # default = bpy.context.active_object.qfmdl.mdl_scale_maxs,
+        description="Maximum allowed vertex coordinates")
 
     @classmethod
     def poll(cls, context):
@@ -183,11 +204,13 @@ class ExportMDL6(bpy.types.Operator, ExportHelper):
         keywords = self.as_keywords (ignore=("check_existing", "filter_glob"))
         return export_mdl.export_mdl(self, context, **keywords)
 
-    '''
     def invoke(self, context, event):
-        self.eyeposition = bpy.context.active_object.qfmdl.eyeposition
-        return {'FINISHED'}
-    '''
+        # self.eyeposition = bpy.context.active_object.qfmdl.eyeposition
+        self.mdl_scale_mins = bpy.context.active_object.qfmdl.mdl_scale_mins
+        self.mdl_scale_maxs = bpy.context.active_object.qfmdl.mdl_scale_maxs
+        return ExportHelper.invoke(self,context,event)
+        # return {"RUNNING_MODAL"}
+        # return {'FINISHED'}
 
 class OBJECT_PT_MDLPanel(bpy.types.Panel):
     bl_label = "MDL Properties"
@@ -217,6 +240,8 @@ class OBJECT_PT_MDLPanel(bpy.types.Panel):
         # layout.prop(obj.qfmdl, "script")
         layout.prop(obj.qfmdl, "xform")
         layout.prop(obj.qfmdl, "md16")
+        layout.prop(obj.qfmdl, "mdl_scale_mins")
+        layout.prop(obj.qfmdl, "mdl_scale_maxs")
 
 def menu_func_import(self, context):
     self.layout.operator(ImportMDL6.bl_idname, text="Quake MDL (.mdl)")

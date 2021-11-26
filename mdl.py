@@ -223,6 +223,30 @@ class MDL:
             if mdl.ident == 'MD16':
                 for vert in self.verts:
                     vert.write(mdl, False)
+        def clamp_to_bounds(self, mins, maxs):
+            """
+            Clamps all vertices and subframes to the bounds specified by mins/maxs
+
+            NOTE - This should be called _before_ Frame.scale(...)
+
+            Keyword Arguments:
+                mins -- (min x, min y, min z)
+                maxs -- (max x, max y, max z)
+            """
+
+            clamp_to_mins = lambda x : tuple(map(max, zip(x, mins)))
+            clamp_to_maxs = lambda x : tuple(map(min, zip(x, maxs)))
+            clamp_to_bounds = lambda x : clamp_to_mins(clamp_to_maxs(x))
+
+            self.mins = clamp_to_bounds(self.mins)
+            self.maxs = clamp_to_bounds(self.maxs)
+
+            if self.type:
+                for subframe in self.frames:
+                    subframe.clamp_to_bounds(mins,maxs)
+            else:
+                for vert in self.verts:
+                    vert.r = clamp_to_bounds(vert.r)
 
     class Vert:
         def __init__(self, r=None, ni=0):

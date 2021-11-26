@@ -209,16 +209,19 @@ def make_frame(mesh, vertmap, idx):
         frame.add_vert(vert)
     return frame
 
-def scale_verts(mdl):
+def scale_verts(mdl,mdl_scale_mins,mdl_scale_maxs):
     tf = MDL.Frame()
     for f in mdl.frames:
         tf.add_frame(f, 0.0)    # let the frame class do the dirty work for us
+    tf.clamp_to_bounds(mdl_scale_mins, mdl_scale_maxs)
+    
     size = Vector(tf.maxs) - Vector(tf.mins)
     rsqr = tuple(map(lambda a, b: max(abs(a), abs(b)) ** 2, tf.mins, tf.maxs))
     mdl.boundingradius = (rsqr[0] + rsqr[1] + rsqr[2]) ** 0.5
     mdl.scale_origin = tf.mins
     mdl.scale = tuple(map(lambda x: x / 255.0, size))
     for f in mdl.frames:
+        f.clamp_to_bounds(mdl_scale_mins, mdl_scale_maxs)
         f.scale(mdl)
 
 def calc_average_area(mdl):
@@ -243,7 +246,9 @@ def get_properties(
             rotate,
             effects,
             xform,
-            md16):
+            md16,
+            mdl_scale_mins,
+            mdl_scale_maxs):
     mdl.palette = MDL.PALETTE[palette]
     mdl.eyeposition = eyeposition
     mdl.synctype = MDL.SYNCTYPE[synctype]
@@ -351,7 +356,9 @@ def export_mdl(
     rotate = False,
     effects = EFFECTS[1],
     xform = True,
-    md16 = False
+    md16 = False,
+    mdl_scale_mins=(-100,-100,-100),
+    mdl_scale_maxs=(100,100,100),
     ):
 
     obj = context.active_object
@@ -374,7 +381,9 @@ def export_mdl(
             rotate,
             effects,
             xform,
-            md16):
+            md16,
+            mdl_scale_mins,
+            mdl_scale_maxs):
                 return {'CANCELLED'}
 
     mdl.tris, mdl.stverts, vertmap = build_tris(mesh)
@@ -400,6 +409,6 @@ def export_mdl(
             mdl.frames.append(make_frame(mesh, vertmap, fno))
     convert_stverts(mdl, mdl.stverts)
     mdl.size = calc_average_area(mdl)
-    scale_verts(mdl)
+    scale_verts(mdl,mdl_scale_mins,mdl_scale_maxs)
     mdl.write(filepath)
     return {'FINISHED'}
