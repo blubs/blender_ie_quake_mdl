@@ -205,18 +205,18 @@ def build_shape_keys(mdl):
     mdl.obj.shape_key_add(name="Basis",from_mix=False)
     mdl.mesh.shape_keys.name = mdl.name
     mdl.obj.active_shape_key_index = 0
-    bpy.context.scene.frame_end = 0
+    # bpy.context.scene.frame_end = 0
     for i, frame in enumerate(mdl.frames):
         frame = mdl.frames[i]
         if frame.type:
             for j in range(len(frame.frames)):
                 make_shape_key(mdl, i, j)
-                bpy.context.scene.frame_end += 1
+                # bpy.context.scene.frame_end += 1
         else:
             make_shape_key(mdl, i)
-            bpy.context.scene.frame_end += 1
+            # bpy.context.scene.frame_end += 1
 
-    bpy.context.scene.frame_start = 1
+    # bpy.context.scene.frame_start = 1
 
 def set_keys(act, data):
     for d in data:
@@ -421,8 +421,8 @@ def import_mdl(operator, context, filepath, palette = 'PAL_QUAKE'):
     mdl.palette = MDL.PALETTE[palette]
     setup_skins(mdl, uvs)
 
-    bpy.context.scene.frame_start = 1
-    bpy.context.scene.frame_end = 1
+    # bpy.context.scene.frame_start = 1
+    # bpy.context.scene.frame_end = 1
     if len(mdl.frames) > 1 or mdl.frames[0].type:
         build_shape_keys(mdl)
         merge_frames(mdl)
